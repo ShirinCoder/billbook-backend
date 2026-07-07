@@ -31,3 +31,32 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Maven
+target/
+
+# STS / Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Temporary
+bin/
