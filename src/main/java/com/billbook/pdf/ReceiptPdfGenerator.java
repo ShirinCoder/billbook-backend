@@ -15,105 +15,111 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.kernel.colors.DeviceRgb;
 
 @Component
 public class ReceiptPdfGenerator {
 
-    public byte[] generate(Receipt receipt) {
+	public byte[] generate(Receipt receipt) {
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        PdfWriter writer = new PdfWriter(out);
-        PdfDocument pdf = new PdfDocument(writer);
-        Document document = new Document(pdf);
+		PdfWriter writer = new PdfWriter(out);
+		PdfDocument pdf = new PdfDocument(writer);
+		Document document = new Document(pdf);
 
-        // Heading
-        document.add(
-                new Paragraph(receipt.getHeading())
-                        .setBold()
-                        .setFontSize(22)
-                        .setTextAlignment(TextAlignment.CENTER));
+		// Heading
+		document.add(
+				new Paragraph(receipt.getHeading()).setBold().setFontSize(22).setTextAlignment(TextAlignment.CENTER));
 
-        document.add(new Paragraph(" "));
+		document.add(new Paragraph(" "));
 
-        // Table
-        Table table = new Table(UnitValue.createPercentArray(new float[]{4, 2, 2, 2}));
-        table.setWidth(UnitValue.createPercentValue(100));
+		// Table
+//        Table table = new Table(UnitValue.createPercentArray(new float[]{4, 2, 2, 2}));
+//        table.setWidth(UnitValue.createPercentValue(100));
 
-        // Header
-        table.addHeaderCell(createHeaderCell("Item"));
-        table.addHeaderCell(createHeaderCell("Qty"));
-        table.addHeaderCell(createHeaderCell("Price"));
-        table.addHeaderCell(createHeaderCell("Amount"));
+		Table table = new Table(UnitValue.createPercentArray(new float[] { 1, 5, 2, 2, 2 }));
 
-        boolean alternate = false;
+		table.setWidth(UnitValue.createPercentValue(100));
 
-        for (ReceiptItem item : receipt.getItems()) {
+		// Header
+		table.addHeaderCell(createHeaderCell("Sr No"));
+		table.addHeaderCell(createHeaderCell("Item"));
+		table.addHeaderCell(createHeaderCell("Qty"));
+		table.addHeaderCell(createHeaderCell("Price"));
+		table.addHeaderCell(createHeaderCell("Amount"));
 
-            Cell itemCell = createBodyCell(item.getItemName());
-            Cell qtyCell = createBodyCell(String.valueOf(item.getQuantity()));
-            Cell priceCell = createBodyCell("₹ " + item.getPrice());
-            Cell amountCell = createBodyCell("₹ " + item.getAmount());
+		boolean alternate = false;
+		int srNo = 1;
+		for (ReceiptItem item : receipt.getItems()) {
+//			table.addCell(createBodyCell(String.valueOf(srNo++)));
+			Cell srCell = createBodyCell(String.valueOf(srNo++));
+			Cell itemCell = createBodyCell(item.getItemName());
+			Cell qtyCell = createBodyCell(String.valueOf(item.getQuantity()));
+			Cell priceCell = createBodyCell("₹ " + item.getPrice());
+			Cell amountCell = createBodyCell("₹ " + item.getAmount());
 
-            if (alternate) {
-                itemCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
-                qtyCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
-                priceCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
-                amountCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
-            }
+			if (alternate) {
+				srCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
+				itemCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
+				qtyCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
+				priceCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
+				amountCell.setBackgroundColor(ColorConstants.LIGHT_GRAY);
+			}
 
-            table.addCell(itemCell);
-            table.addCell(qtyCell);
-            table.addCell(priceCell);
-            table.addCell(amountCell);
+			table.addCell(srCell);
+			table.addCell(itemCell);
+			table.addCell(qtyCell);
+			table.addCell(priceCell);
+			table.addCell(amountCell);
 
-            alternate = !alternate;
-        }
+			alternate = !alternate;
+		}
 
-        // Grand Total Row
-        table.addCell(new Cell(1, 3)
-                .add(new Paragraph("Grand Total").setBold())
-                .setTextAlignment(TextAlignment.RIGHT)
-                .setBackgroundColor(ColorConstants.LIGHT_GRAY));
+		// Grand Total Row
+		table.addCell(new Cell(1, 4).add(new Paragraph("Grand Total ").setBold()).setTextAlignment(TextAlignment.RIGHT)
+				.setBackgroundColor(ColorConstants.LIGHT_GRAY));
 
-        table.addCell(new Cell()
-                .add(new Paragraph("₹ " + receipt.getGrandTotal()).setBold())
-                .setTextAlignment(TextAlignment.CENTER)
-                .setBackgroundColor(ColorConstants.YELLOW));
+		table.addCell(new Cell().add(new Paragraph("Rs. " + receipt.getGrandTotal()).setBold())
+				.setTextAlignment(TextAlignment.CENTER).setBackgroundColor(ColorConstants.YELLOW));
 
-        document.add(table);
+		document.add(table);
 
-        // Notes
-        if (receipt.getNotes() != null && !receipt.getNotes().isBlank()) {
+		// Notes
+		if (receipt.getNotes() != null && !receipt.getNotes().isBlank()) {
 
-            document.add(new Paragraph(" "));
-            document.add(new Paragraph("Notes")
-                    .setBold()
-                    .setFontSize(12));
+//            document.add(new Paragraph(" "));
+//            document.add(new Paragraph("Notes")
+//                    .setBold()
+//                    .setFontSize(12));
+//
+//            document.add(new Paragraph(receipt.getNotes()));
+		}
 
-            document.add(new Paragraph(receipt.getNotes()));
-        }
+		document.close();
 
-        document.close();
+		return out.toByteArray();
+	}
 
-        return out.toByteArray();
-    }
+	// Header Cell
+//    private Cell createHeaderCell(String text) {
+//
+//        return new Cell()
+//                .add(new Paragraph(text).setBold())
+//                .setBackgroundColor(ColorConstants.BLUE)
+//                .setFontColor(ColorConstants.WHITE)
+//                .setTextAlignment(TextAlignment.CENTER);
+//    }
 
-    // Header Cell
-    private Cell createHeaderCell(String text) {
+	private Cell createHeaderCell(String text) {
 
-        return new Cell()
-                .add(new Paragraph(text).setBold())
-                .setBackgroundColor(ColorConstants.BLUE)
-                .setFontColor(ColorConstants.WHITE)
-                .setTextAlignment(TextAlignment.CENTER);
-    }
+		return new Cell().add(new Paragraph(text).setBold().setFontColor(ColorConstants.BLACK))
+				.setBackgroundColor(new DeviceRgb(220, 235, 255)).setTextAlignment(TextAlignment.CENTER);
+	}
 
-    // Body Cell
-    private Cell createBodyCell(String text) {
+	// Body Cell
+	private Cell createBodyCell(String text) {
 
-        return new Cell()
-                .add(new Paragraph(text))
-                .setTextAlignment(TextAlignment.CENTER);
-    }
+		return new Cell().add(new Paragraph(text)).setTextAlignment(TextAlignment.CENTER);
+	}
 }
